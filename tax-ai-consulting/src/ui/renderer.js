@@ -4,6 +4,7 @@
 
 import { SCENARIO_META, SCENARIO_FORMS } from './forms.js';
 import { wonStr, wonKo, diffStr, savingStr } from './formatter.js';
+import { renderChatPanelHTML }              from './chat-panel.js';
 
 function esc(str) {
   return String(str ?? '')
@@ -206,6 +207,7 @@ export function renderResultHTML(result) {
     ${case2HTML}
     ${holdingHTML}
     ${lawHTML}
+    ${renderChatPanelHTML()}
   `;
 }
 

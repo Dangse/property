@@ -8,7 +8,8 @@ import {
   runScenario1, runScenario2, runScenario3, runScenario4, runScenario5,
   runScenario6, runScenario7, runScenario8, runScenario9, runScenario10,
 } from '../scenario/index.js';
-import { parseInput } from './formatter.js';
+import { parseInput }    from './formatter.js';
+import { initChatPanel } from './chat-panel.js';
 
 const RUNNERS = {
   1: runScenario1,  2: runScenario2,  3: runScenario3,
@@ -103,6 +104,7 @@ function initScenarioForm(id) {
       const resultSection = document.getElementById('result-section');
       resultSection.innerHTML = renderResultHTML(result);
       resultSection.style.display = '';
+      initChatPanel(result);
       setTimeout(() => {
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 50);

@@ -1,0 +1,10 @@
+name = "tax-ai-proxy"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# 배포 후 생성되는 URL: https://tax-ai-proxy.<your-subdomain>.workers.dev
+# 비밀키는 다음 명령으로 등록:
+#   wrangler secret put ANTHROPIC_API_KEY
+#
+# 배포:
+#   wrangler deploy
