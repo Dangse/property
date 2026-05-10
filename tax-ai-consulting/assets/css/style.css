@@ -615,6 +615,93 @@ label.field-label {
   .chat-card { display: none !important; }
 }
 
+/* ── Law Review (법령 검토) ──────────────────────────────── */
+.chat-review-bar {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.chat-review-btn {
+  background: #fff;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.chat-review-btn:hover:not(:disabled) { background: #eef4ff; }
+.chat-review-btn:disabled { opacity: 0.6; cursor: wait; }
+
+.chat-review-result { width: 100%; margin-top: 6px; font-size: 13px; }
+
+.chat-review-overall {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 4px solid;
+}
+.chat-review-overall > div { font-size: 12px; margin-top: 2px; opacity: 0.85; }
+.chat-review-good    { background: #ecfdf5; border-left-color: #16a34a; color: #14532d; }
+.chat-review-caution { background: #fffbeb; border-left-color: #f59e0b; color: #78350f; }
+.chat-review-bad     { background: #fef2f2; border-left-color: #dc2626; color: #7f1d1d; }
+
+.chat-review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chat-review-list li {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.chat-review-list strong { color: var(--text); }
+
+.review-reason {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.review-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--primary);
+  font-size: 11px;
+  text-decoration: none;
+}
+.review-link:hover { text-decoration: underline; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+.badge-good    { background: #d1fae5; color: #065f46; }
+.badge-caution { background: #fef3c7; color: #78350f; }
+.badge-bad     { background: #fee2e2; color: #7f1d1d; }
+
+/* user 버블에서는 텍스트 색을 다시 지정 */
+.chat-msg-user .chat-review-result,
+.chat-msg-user .chat-review-list strong { color: var(--text); }
+
 /* ── Loading indicator ───────────────────────────────────── */
 .loading { text-align: center; padding: 40px; color: var(--text-muted); }
 .loading::after { content: ''; display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }

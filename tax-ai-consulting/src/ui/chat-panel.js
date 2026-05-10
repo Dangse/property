@@ -8,6 +8,7 @@
 
 import { chatStream }        from '../ai/chat.js';
 import { buildSystemPrompt } from '../ai/system-prompt.js';
+import { reviewLaws }        from '../ai/law-review.js';
 
 /** 추천 후속 질문 */
 const SUGGESTED_QUESTIONS = [
@@ -102,6 +103,7 @@ export function initChatPanel(result) {
         },
       });
       history.push({ role: 'assistant', content: fullText });
+      attachReviewControls(aiBubble, fullText);
     } catch (err) {
       console.error(err);
       aiBody.innerHTML = `<span style="color:var(--danger)">⚠ 오류: ${escHtml(err.message)}</span>`;
@@ -111,6 +113,82 @@ export function initChatPanel(result) {
       input.focus();
     }
   });
+}
+
+// ── 법령 검토 ─────────────────────────────────────────────────
+function attachReviewControls(bubble, answerText) {
+  // 인용이 하나도 없으면 버튼 표시하지 않음
+  if (!/제\s*\d+\s*조/.test(answerText)) return;
+
+  const body = bubble.querySelector('.chat-body');
+  const bar  = document.createElement('div');
+  bar.className = 'chat-review-bar';
+  bar.innerHTML = `
+    <button type="button" class="chat-review-btn">🔍 법령 검토</button>
+    <span class="chat-review-status"></span>
+  `;
+  body.appendChild(bar);
+
+  const btn    = bar.querySelector('.chat-review-btn');
+  const status = bar.querySelector('.chat-review-status');
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '검토 중…';
+    status.textContent = '';
+
+    try {
+      const result = await reviewLaws(answerText);
+      btn.remove();
+      bar.appendChild(renderReview(result));
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '🔍 법령 검토';
+      status.innerHTML = `<span class="badge badge-bad">오류: ${escHtml(err.message)}</span>`;
+    }
+  });
+}
+
+function renderReview(result) {
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-review-result';
+
+  const overallLabel = {
+    good:    { cls: 'good',    text: '✓ 검토 완료 — 인용 정확' },
+    caution: { cls: 'caution', text: '⚠ 일부 확인 필요' },
+    bad:     { cls: 'bad',     text: '✗ 부정확한 인용 발견' },
+  }[result.overall] || { cls: 'caution', text: '검토 결과' };
+
+  const items = result.citations.map(c => {
+    if (c.status === 'unknown') {
+      return `<li><span class="badge badge-caution">DB 외</span>
+        <strong>${escHtml(c.key)}</strong>
+        <span class="review-reason">DB에 등록되지 않은 조항. 별도 확인 필요.</span></li>`;
+    }
+    const judgment = c.judgment || 'verified';
+    const jLabel = {
+      accurate:   { cls: 'good',    text: '✓ 정확' },
+      partial:    { cls: 'caution', text: '⚠ 부분일치' },
+      inaccurate: { cls: 'bad',     text: '✗ 부정확' },
+      verified:   { cls: 'good',    text: '✓ DB 등록됨' },
+    }[judgment];
+    return `<li>
+      <span class="badge badge-${jLabel.cls}">${jLabel.text}</span>
+      <strong>${escHtml(c.key)}</strong> — ${escHtml(c.entry.title)}
+      ${c.reason ? `<div class="review-reason">${escHtml(c.reason)}</div>` : ''}
+      <a href="${escAttr(c.entry.url)}" target="_blank" rel="noopener" class="review-link">원문 →</a>
+    </li>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="chat-review-overall chat-review-${overallLabel.cls}">
+      <strong>${overallLabel.text}</strong>
+      ${result.overallReason ? `<div>${escHtml(result.overallReason)}</div>` : ''}
+    </div>
+    <ul class="chat-review-list">${items}</ul>
+  `;
+  return wrap;
 }
 
 // ── DOM 헬퍼 ──────────────────────────────────────────────────

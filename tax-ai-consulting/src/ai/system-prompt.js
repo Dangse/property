@@ -6,6 +6,7 @@
  */
 
 import { wonStr, wonKo } from '../ui/formatter.js';
+import { LAW_DATABASE } from '../data/laws.js';
 
 const PERSONA = `당신은 한국 부동산 세무를 전문으로 하는 AI 컨설턴트 "투자가 AI"입니다.
 사용자는 본 시스템에서 시나리오 기반 세금 계산을 마쳤고, 그 결과에 대해 후속 질문을 합니다.
@@ -13,7 +14,7 @@ const PERSONA = `당신은 한국 부동산 세무를 전문으로 하는 AI 컨
 답변 원칙:
 1. 한국어로 친절하고 전문적으로 답변하세요.
 2. 구체적인 숫자(시뮬레이션 결과)를 인용하여 근거를 제시하세요.
-3. 관련 법령(소득세법, 상속세 및 증여세법, 지방세법, 종합부동산세법 등)이 있으면 조항을 명시하세요.
+3. 관련 법령은 반드시 아래 [법령 DB]에 등록된 조항을 우선 인용하세요. 인용 시 "소득세법 제95조"와 같이 표준 형식으로 작성하세요. DB 외 조항은 "참고: DB 외 조항으로 별도 확인 필요"를 명시하세요.
 4. 단순 절세를 넘어 세무조사 위험·실거주 요건·5년 보유 등 부수적 함의도 짚어주세요.
 5. 본 계산 결과는 추정치이며 최종 결정 전 세무사 상담을 권하세요.
 6. 마크다운 사용 가능 (**굵게**, 항목별 - 리스트, ## 소제목).
@@ -123,7 +124,21 @@ function buildResultContext(result) {
   return lines.join('\n');
 }
 
+function buildLawSection() {
+  const lines = ['## 법령 DB (인용 시 우선 사용)', ''];
+  LAW_DATABASE.forEach(l => {
+    // "소득세법 §95" → "소득세법 제95조" 형식으로 변환하여 모델이 인용 형식 학습
+    const articleStr = l.key.replace(/§(\d+)(?:의(\d+))?/, (_, n, sub) =>
+      sub ? `제${n}조의${sub}` : `제${n}조`);
+    lines.push(`- **${articleStr}** (${l.title}): ${l.summary}`);
+  });
+  return lines.join('\n');
+}
+
 export function buildSystemPrompt(result) {
   const ctx = buildResultContext(result);
-  return ctx ? `${PERSONA}\n\n${ctx}` : PERSONA;
+  const lawSection = buildLawSection();
+  const parts = [PERSONA, lawSection];
+  if (ctx) parts.push(ctx);
+  return parts.join('\n\n');
 }
