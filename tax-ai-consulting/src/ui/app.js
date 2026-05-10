@@ -10,6 +10,8 @@ import {
 } from '../scenario/index.js';
 import { parseInput }    from './formatter.js';
 import { initChatPanel } from './chat-panel.js';
+import { exportPDF }     from '../export/pdf-export.js';
+import { exportWord }    from '../export/word-export.js';
 
 const RUNNERS = {
   1: runScenario1,  2: runScenario2,  3: runScenario3,
@@ -104,6 +106,8 @@ function initScenarioForm(id) {
       const resultSection = document.getElementById('result-section');
       resultSection.innerHTML = renderResultHTML(result);
       resultSection.style.display = '';
+      document.getElementById('export-pdf-btn')?.addEventListener('click', () => exportPDF(result));
+      document.getElementById('export-word-btn')?.addEventListener('click', () => exportWord(result));
       initChatPanel(result);
       setTimeout(() => {
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });

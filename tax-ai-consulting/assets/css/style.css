@@ -399,6 +399,7 @@ label.field-label {
 /* Print bar */
 .print-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -454,11 +455,13 @@ label.field-label {
 }
 
 /* ── Print styles ────────────────────────────────────────── */
+@page { size: A4; margin: 18mm 16mm; }
 @media print {
   #app-header, .back-btn, .print-bar, #form-section, .sample-bar { display: none !important; }
-  body { background: #fff; }
+  body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .result-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
-  .summary-box { break-inside: avoid; }
+  .summary-box, .result-table { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
 }
 
 /* ── Responsive ──────────────────────────────────────────── */

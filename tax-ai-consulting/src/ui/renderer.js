@@ -184,7 +184,9 @@ export function renderResultHTML(result) {
 
   return `
     <div class="print-bar">
-      <button type="button" class="primary" onclick="window.print()">🖨 인쇄 / PDF 저장</button>
+      <button type="button" class="primary" id="export-pdf-btn">📄 PDF로 저장</button>
+      <button type="button" class="primary" id="export-word-btn">📝 Word 다운로드</button>
+      <button type="button" id="export-print-btn" onclick="window.print()">🖨 화면 인쇄</button>
     </div>
 
     <div class="report-header">
