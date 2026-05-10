@@ -39,6 +39,7 @@ const PRINT_CSS = `
 export function exportPDF(result) {
   const { title, bodyHtml, css } = buildReportParts(result);
 
+  // CSP-safe: 인라인 <script>·onclick 없이 작성, 부모 창에서 이벤트 바인딩
   const html = `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -48,19 +49,13 @@ export function exportPDF(result) {
 </head>
 <body>
   <div class="print-toolbar no-print">
-    <button type="button" onclick="window.print()">📄 PDF로 저장 / 인쇄</button>
-    <button type="button" onclick="window.close()">닫기</button>
+    <button type="button" id="btn-print">📄 PDF로 저장 / 인쇄</button>
+    <button type="button" id="btn-close">닫기</button>
     <span class="hint">인쇄 대화상자에서 "PDF로 저장"을 선택하세요</span>
   </div>
   <div class="report-container">
     ${bodyHtml}
   </div>
-  <script>
-    // 페이지 로드 후 자동으로 인쇄 다이얼로그 열기
-    window.addEventListener('load', () => {
-      setTimeout(() => window.print(), 300);
-    });
-  </script>
 </body>
 </html>`;
 
@@ -72,6 +67,17 @@ export function exportPDF(result) {
   win.document.open();
   win.document.write(html);
   win.document.close();
+
+  // 팝업 DOM 구성 후 부모에서 이벤트 바인딩 + 자동 인쇄 트리거
+  const triggerPrint = () => {
+    try {
+      win.document.getElementById('btn-print')?.addEventListener('click', () => win.print());
+      win.document.getElementById('btn-close')?.addEventListener('click', () => win.close());
+      setTimeout(() => win.print(), 400);
+    } catch { /* cross-origin 보호 등 — 사용자 수동 클릭으로 진행 */ }
+  };
+  if (win.document.readyState === 'complete') triggerPrint();
+  else win.addEventListener('load', triggerPrint);
 }
 
 function escAttr(s) {
