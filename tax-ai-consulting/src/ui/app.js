@@ -74,6 +74,7 @@ function refreshSavedSection() {
 function bindResultControls(result, { scenarioId, defaultName } = {}) {
   document.getElementById('export-pdf-btn')?.addEventListener('click', () => exportPDF(result));
   document.getElementById('export-word-btn')?.addEventListener('click', () => exportWord(result));
+  document.getElementById('export-print-btn')?.addEventListener('click', () => window.print());
 
   const saveBtn = document.getElementById('save-scenario-btn');
   if (saveBtn) {

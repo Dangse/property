@@ -1,0 +1,12 @@
+# Cloudflare Pages 프로젝트 설정
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+
+name = "tuzaga-tax-ai"
+compatibility_date = "2025-01-01"
+
+# 정적 자산 + Functions 루트 (현재 디렉터리)
+pages_build_output_dir = "."
+
+# 환경변수 (비밀값은 wrangler pages secret put 또는 대시보드에서 등록)
+# [vars]                              # 공개 변수만 여기에
+# (ANTHROPIC_API_KEY는 반드시 secret로!)

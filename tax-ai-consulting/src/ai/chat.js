@@ -6,8 +6,25 @@
  * - AbortController 지원 (사용자 취소)
  */
 
-/** Cloudflare Worker URL — 배포 후 실제 URL로 교체 */
-export const WORKER_URL = 'https://tax-ai-proxy.your-subdomain.workers.dev/api/chat';
+/**
+ * API 엔드포인트 결정
+ *
+ * 우선순위:
+ *   1) <meta name="api-base" content="https://your-worker.workers.dev"> 가 있으면 사용
+ *      (별도 Worker 배포 시 옵션)
+ *   2) 같은 origin의 /api/chat (Cloudflare Pages Functions 기본 경로)
+ */
+function resolveApiUrl() {
+  if (typeof document !== 'undefined') {
+    const meta = document.querySelector('meta[name="api-base"]');
+    if (meta?.content) {
+      return meta.content.replace(/\/+$/, '') + '/api/chat';
+    }
+  }
+  return '/api/chat';
+}
+
+export const WORKER_URL = resolveApiUrl();
 
 /**
  * Claude에 메시지 전송하고 스트리밍 응답을 받음

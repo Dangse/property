@@ -1,0 +1,6 @@
+# Cloudflare Pages — SPA fallback
+# 모든 알 수 없는 경로는 index.html로 (해시 라우터 대응)
+# 단, /api/* 는 Functions로 라우팅되므로 영향 없음
+# 정적 자산도 우선 매칭됨
+
+/*  /index.html  200
