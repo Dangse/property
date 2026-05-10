@@ -1,0 +1,105 @@
+import { describe, it, expect } from 'vitest';
+import { calcTakingTax, calcGiveTakingEtcTax } from '../../src/core/acquisition-tax.js';
+
+describe('calcTakingTax — 취득세', () => {
+  describe('일반 매매 (normal)', () => {
+    it('6억 이하: 1%', () => {
+      const r = calcTakingTax('normal', 500_000_000, 0, 0, 85, 0);
+      expect(r.breakdown.takeRate).toBe(0.01);
+      expect(r.takeTax).toBe(5_000_000);
+    });
+
+    it('9억 초과: 3%', () => {
+      const r = calcTakingTax('normal', 1_000_000_000, 0, 0, 85, 0);
+      expect(r.breakdown.takeRate).toBe(0.03);
+      expect(r.takeTax).toBe(30_000_000);
+    });
+
+    it('6~9억 누진 구간', () => {
+      const r = calcTakingTax('normal', 750_000_000, 0, 0, 85, 0);
+      expect(r.breakdown.takeRate).toBeGreaterThan(0.01);
+      expect(r.breakdown.takeRate).toBeLessThan(0.03);
+    });
+
+    it('국민주택규모(85) 이하: 농특세 면제', () => {
+      const r = calcTakingTax('normal', 500_000_000, 0, 0, 85, 0);
+      expect(r.agTax).toBe(0);
+    });
+
+    it('국민주택규모 초과(86): 농특세 부과', () => {
+      const r = calcTakingTax('normal', 500_000_000, 0, 0, 86, 0);
+      expect(r.agTax).toBeGreaterThan(0);
+    });
+  });
+
+  describe('신규 분양', () => {
+    it('newHouse=1 → 1%', () => {
+      const r = calcTakingTax('normal', 500_000_000, 1, 0, 85, 0);
+      expect(r.breakdown.takeRate).toBe(0.01);
+    });
+
+    it('newHouse=8 (다주택 중과 8%) — 농특세율 0.6%', () => {
+      const r = calcTakingTax('normal', 500_000_000, 8, 0, 86, 0);
+      expect(r.breakdown.takeRate).toBe(0.08);
+      expect(r.breakdown.agRate).toBe(0.006);
+    });
+
+    it('newHouse=12 (법인·다주택 12%) — 농특세율 1%', () => {
+      const r = calcTakingTax('normal', 500_000_000, 12, 0, 86, 0);
+      expect(r.breakdown.takeRate).toBe(0.12);
+      expect(r.breakdown.agRate).toBe(0.01);
+    });
+  });
+
+  describe('상속 (inherit)', () => {
+    it('1주택: 0.8%, 농특세 면제', () => {
+      const r = calcTakingTax('inherit', 500_000_000, 0, 0, 86, 0);
+      expect(r.breakdown.takeRate).toBe(0.008);
+      expect(r.agTax).toBe(0);
+    });
+
+    it('다주택 상속: 2.8%', () => {
+      const r = calcTakingTax('inherit', 500_000_000, 0, 1, 85, 0);
+      expect(r.breakdown.takeRate).toBe(0.028);
+    });
+  });
+
+  describe('증여 (give)', () => {
+    it('비조정지역: 3.5%', () => {
+      const r = calcTakingTax('give', 500_000_000, 0, 0, 85, 0);
+      expect(r.breakdown.takeRate).toBe(0.035);
+    });
+
+    it('조정지역 3억 이상: 12% 중과', () => {
+      const r = calcTakingTax('give', 500_000_000, 0, 0, 85, 1);
+      expect(r.breakdown.takeRate).toBe(0.12);
+    });
+
+    it('조정지역 3억 미만: 일반세율 3.5%', () => {
+      const r = calcTakingTax('give', 200_000_000, 0, 0, 85, 1);
+      expect(r.breakdown.takeRate).toBe(0.035);
+    });
+  });
+
+  it('1세대1주택 배우자/직계 증여 (give1s1h): 중과 없음 3.5%', () => {
+    const r = calcTakingTax('give1s1h', 500_000_000, 0, 0, 85, 1);
+    expect(r.breakdown.takeRate).toBe(0.035);
+  });
+
+  it('분양권·입주권(pre): 2.8%', () => {
+    const r = calcTakingTax('pre', 500_000_000, 0, 0, 85, 0);
+    expect(r.breakdown.takeRate).toBe(0.028);
+  });
+
+  it('total = takeTax + agTax + eduTax', () => {
+    const r = calcTakingTax('normal', 500_000_000, 0, 0, 86, 0);
+    expect(r.total).toBe(r.takeTax + r.agTax + r.eduTax);
+  });
+});
+
+describe('calcGiveTakingEtcTax', () => {
+  it('give 로직과 동일한 결과 반환', () => {
+    const r = calcGiveTakingEtcTax(500_000_000, 85, 1);
+    expect(r.breakdown.takeRate).toBe(0.12);
+  });
+});
