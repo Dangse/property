@@ -30,6 +30,7 @@ export function renderHomeHTML() {
     <h2 class="page-title">부동산 세금 절세 시나리오</h2>
     <p class="page-sub">증여·양도·보유세를 비교해 최적의 절세 방법을 안내합니다. 해당하는 시나리오를 선택하세요.</p>
     <div id="scenario-grid">${cards}</div>
+    <div id="saved-section"></div>
   `;
 }
 
@@ -59,6 +60,18 @@ export function renderScenarioHTML(id) {
     </form>
 
     <div id="result-section" style="display:none;"></div>
+  `;
+}
+
+// ── Loaded saved scenario view ────────────────────────────────
+export function renderLoadedHTML(saved) {
+  return `
+    <button class="back-btn" id="back-btn">← 목록으로</button>
+    <div class="loaded-banner">
+      📂 저장된 시나리오 — <strong>${String(saved.name).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))}</strong>
+      · 저장일: ${new Date(saved.createdAt).toLocaleString('ko-KR')}
+    </div>
+    <div id="result-section">${renderResultHTML(saved.result)}</div>
   `;
 }
 
@@ -184,6 +197,7 @@ export function renderResultHTML(result) {
 
   return `
     <div class="print-bar">
+      <button type="button" class="primary" id="save-scenario-btn">💾 저장</button>
       <button type="button" class="primary" id="export-pdf-btn">📄 PDF로 저장</button>
       <button type="button" class="primary" id="export-word-btn">📝 Word 다운로드</button>
       <button type="button" id="export-print-btn" onclick="window.print()">🖨 화면 인쇄</button>

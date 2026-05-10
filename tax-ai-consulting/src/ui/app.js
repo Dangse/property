@@ -2,8 +2,8 @@
  * 메인 앱 컨트롤러 — 라우팅, 폼 초기화, 결과 렌더링
  */
 
-import { SCENARIO_FORMS } from './forms.js';
-import { renderHomeHTML, renderScenarioHTML, renderResultHTML } from './renderer.js';
+import { SCENARIO_FORMS, SCENARIO_META } from './forms.js';
+import { renderHomeHTML, renderScenarioHTML, renderResultHTML, renderLoadedHTML } from './renderer.js';
 import {
   runScenario1, runScenario2, runScenario3, runScenario4, runScenario5,
   runScenario6, runScenario7, runScenario8, runScenario9, runScenario10,
@@ -12,6 +12,8 @@ import { parseInput }    from './formatter.js';
 import { initChatPanel } from './chat-panel.js';
 import { exportPDF }     from '../export/pdf-export.js';
 import { exportWord }    from '../export/word-export.js';
+import { saveScenario, getScenario }                        from '../storage/scenarios.js';
+import { renderSavedSectionHTML, bindSavedSection }         from './scenario-list.js';
 
 const RUNNERS = {
   1: runScenario1,  2: runScenario2,  3: runScenario3,
@@ -28,6 +30,18 @@ function navigate() {
   if (!hash || hash === '#' || hash === '#/') {
     view.innerHTML = renderHomeHTML();
     bindScenarioCards();
+    refreshSavedSection();
+    return;
+  }
+
+  const loadMatch = hash.match(/^#load-(.+)$/);
+  if (loadMatch) {
+    const saved = getScenario(loadMatch[1]);
+    if (!saved) { location.hash = ''; return; }
+    view.innerHTML = renderLoadedHTML(saved);
+    bindResultControls(saved.result, { scenarioId: saved.scenarioId, defaultName: saved.name });
+    document.getElementById('back-btn')?.addEventListener('click', () => { location.hash = ''; });
+    initChatPanel(saved.result);
     return;
   }
 
@@ -41,6 +55,48 @@ function navigate() {
   }
 
   location.hash = '';
+}
+
+function refreshSavedSection() {
+  const host = document.getElementById('saved-section');
+  if (!host) return;
+  host.innerHTML = renderSavedSectionHTML();
+  bindSavedSection(
+    id => { location.hash = `#load-${id}`; },
+    () => refreshSavedSection(),
+  );
+}
+
+/**
+ * 결과 화면의 저장/내보내기 버튼 공통 바인딩
+ * (계산 직후·저장 불러오기 양쪽에서 사용)
+ */
+function bindResultControls(result, { scenarioId, defaultName } = {}) {
+  document.getElementById('export-pdf-btn')?.addEventListener('click', () => exportPDF(result));
+  document.getElementById('export-word-btn')?.addEventListener('click', () => exportWord(result));
+
+  const saveBtn = document.getElementById('save-scenario-btn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const meta  = SCENARIO_META.find(s => s.id === scenarioId);
+      const title = meta ? meta.title.replace(/\n/g, ' ') : (result.title || '시나리오');
+      const name  = prompt('시나리오 이름을 입력하세요:', defaultName || title);
+      if (name == null) return; // 취소
+      saveScenario({
+        name,
+        scenarioId: scenarioId || result.scenarioId || 0,
+        scenarioTitle: result.title || title,
+        inputs: result.inputs || {},
+        result,
+      });
+      saveBtn.textContent = '✓ 저장됨';
+      saveBtn.disabled = true;
+      setTimeout(() => {
+        saveBtn.textContent = '💾 저장';
+        saveBtn.disabled = false;
+      }, 1800);
+    });
+  }
 }
 
 function bindScenarioCards() {
@@ -103,11 +159,13 @@ function initScenarioForm(id) {
     try {
       const inputs = collectInputs(id, form);
       const result = RUNNERS[id](inputs);
+      // 저장 기능을 위해 입력값과 시나리오 ID를 결과 객체에 첨부
+      result.inputs = result.inputs || inputs;
+      result.scenarioId = id;
       const resultSection = document.getElementById('result-section');
       resultSection.innerHTML = renderResultHTML(result);
       resultSection.style.display = '';
-      document.getElementById('export-pdf-btn')?.addEventListener('click', () => exportPDF(result));
-      document.getElementById('export-word-btn')?.addEventListener('click', () => exportWord(result));
+      bindResultControls(result, { scenarioId: id });
       initChatPanel(result);
       setTimeout(() => {
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
