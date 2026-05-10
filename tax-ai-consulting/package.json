@@ -1,0 +1,14 @@
+{
+  "name": "tax-ai-consulting",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "부동산 세금 계산·시나리오 상담 엔진 (2026.5.10 시행 기준)",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
+}
