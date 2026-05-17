@@ -80,7 +80,7 @@ export function mountChat({ container, inputEl, sendBtn, statusEl, config, getFo
       }).then(reviewResult => {
         bodyEl.insertAdjacentHTML('beforeend', renderReview(reviewResult));
         statusEl.textContent = `완료 · 리스크 ${reviewResult.riskLevel}${reviewResult.cached ? ' (캐시)' : ''}`;
-        onReview?.({ question: text, answer: finalText, review: reviewResult });
+        onReview?.({ question: text, answer: finalText, review: reviewResult, toolCalls });
       }).catch(err => {
         bodyEl.insertAdjacentHTML('beforeend',
           `<div class="error">국세청 검토 실패: ${escapeHtml(err.message)}</div>`);

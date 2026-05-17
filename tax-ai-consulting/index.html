@@ -108,12 +108,12 @@
 <script type="module">
   import { mountInputForm } from './src/ui/input-form.js';
   import { mountChat }      from './src/ui/chat.js';
-  import { mountPreview }   from './src/ui/preview.js';
+  import { mountPreview, PREVIEW_CSS }   from './src/ui/preview.js';
   import { renderReview, REVIEW_PANEL_CSS } from './src/ui/review-panel.js';
 
-  // review-panel CSS 주입
+  // 보조 CSS 주입
   const _styleEl = document.createElement('style');
-  _styleEl.textContent = REVIEW_PANEL_CSS;
+  _styleEl.textContent = REVIEW_PANEL_CSS + PREVIEW_CSS;
   document.head.appendChild(_styleEl);
 
   let config;
@@ -128,7 +128,15 @@
   }
 
   const form    = mountInputForm({ container: document.getElementById('left-panel') });
-  const preview = mountPreview({ container: document.getElementById('right-panel') });
+  const preview = mountPreview({
+    container: document.getElementById('right-panel'),
+    getClientInfo: () => form.getValues(),
+    office: config.OFFICE ?? {},
+  });
+
+  // 현재 진행 중인 턴 — chat → preview 연결용 임시 저장소
+  let pendingTurn = null;
+
   mountChat({
     container: document.getElementById('chat'),
     inputEl:   document.getElementById('user-input'),
@@ -136,12 +144,8 @@
     statusEl:  document.getElementById('status'),
     config,
     getFormSummary: () => form.getSummary(),
-    onReview: ({ question, answer, review: r }) => {
-      preview.append(`
-        <h4>Q. ${question.replace(/</g,'&lt;').slice(0,120)}</h4>
-        <div class="answer">${answer.replace(/</g,'&lt;').slice(0,800)}</div>
-        ${renderReview(r)}
-      `);
+    onReview: ({ question, answer, review: r, toolCalls }) => {
+      preview.addTurn({ question, answer, toolCalls: toolCalls ?? [], review: r });
     },
   });
 </script>

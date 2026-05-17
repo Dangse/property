@@ -20,3 +20,12 @@ export const REVIEWER_MODEL = 'claude-opus-4-7';
 
 // 응답 최대 토큰
 export const MAX_TOKENS = 4096;
+
+// 사무소 정보 (Word 보고서 표지·푸터)
+export const OFFICE = {
+  name: 'Tuzaga 세무사사무소',
+  footerText: 'Tuzaga 세무사사무소 · 본 보고서는 AI 보조 도구로 작성되었으며 최종 검토는 세무사가 수행합니다.',
+  // 로고 이미지 base64 (선택). 미설정 시 표지에서 생략.
+  // 예: 'data:image/png;base64,iVBORw0KGgo...' 의 콤마 뒷부분
+  logoBase64: '',
+};
