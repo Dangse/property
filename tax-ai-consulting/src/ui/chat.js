@@ -3,7 +3,9 @@
  */
 
 import { chat } from '../ai/narrator.js';
+import { review } from '../ai/reviewer.js';
 import { renderBreakdown, renderToolCall } from './toggle.js';
+import { renderReview } from './review-panel.js';
 
 let conversationHistory = [];
 
@@ -34,7 +36,7 @@ function appendMessage(role, html, container) {
   return el;
 }
 
-export function mountChat({ container, inputEl, sendBtn, statusEl, config, getFormSummary }) {
+export function mountChat({ container, inputEl, sendBtn, statusEl, config, getFormSummary, onReview }) {
   async function send() {
     const text = inputEl.value.trim();
     if (!text) return;
@@ -66,7 +68,24 @@ export function mountChat({ container, inputEl, sendBtn, statusEl, config, getFo
 
       conversationHistory = updatedHistory;
       bodyEl.innerHTML = renderMarkdown(finalText || '(빈 응답)') + toolPieces.join('');
-      statusEl.textContent = `완료 · 도구 호출 ${toolCalls.length}회`;
+      statusEl.textContent = `완료 · 도구 호출 ${toolCalls.length}회 · 국세청 검토 중…`;
+
+      // 국세청 검토 — 비동기 (Reviewer)
+      review({
+        apiKey: config.ANTHROPIC_API_KEY,
+        model:  config.REVIEWER_MODEL ?? config.NARRATOR_MODEL,
+        question: text,
+        narratorAnswer: finalText,
+        toolCalls,
+      }).then(reviewResult => {
+        bodyEl.insertAdjacentHTML('beforeend', renderReview(reviewResult));
+        statusEl.textContent = `완료 · 리스크 ${reviewResult.riskLevel}${reviewResult.cached ? ' (캐시)' : ''}`;
+        onReview?.({ question: text, answer: finalText, review: reviewResult });
+      }).catch(err => {
+        bodyEl.insertAdjacentHTML('beforeend',
+          `<div class="error">국세청 검토 실패: ${escapeHtml(err.message)}</div>`);
+        statusEl.textContent = `완료 · 검토 오류`;
+      });
     } catch (err) {
       bodyEl.innerHTML = `<div class="error">⚠️ ${escapeHtml(err.message)}</div>`;
       statusEl.textContent = '오류 발생';

@@ -109,6 +109,12 @@
   import { mountInputForm } from './src/ui/input-form.js';
   import { mountChat }      from './src/ui/chat.js';
   import { mountPreview }   from './src/ui/preview.js';
+  import { renderReview, REVIEW_PANEL_CSS } from './src/ui/review-panel.js';
+
+  // review-panel CSS 주입
+  const _styleEl = document.createElement('style');
+  _styleEl.textContent = REVIEW_PANEL_CSS;
+  document.head.appendChild(_styleEl);
 
   let config;
   try {
@@ -130,6 +136,13 @@
     statusEl:  document.getElementById('status'),
     config,
     getFormSummary: () => form.getSummary(),
+    onReview: ({ question, answer, review: r }) => {
+      preview.append(`
+        <h4>Q. ${question.replace(/</g,'&lt;').slice(0,120)}</h4>
+        <div class="answer">${answer.replace(/</g,'&lt;').slice(0,800)}</div>
+        ${renderReview(r)}
+      `);
+    },
   });
 </script>
 
