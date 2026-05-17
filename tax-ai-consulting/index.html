@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI 세무 컨설팅 — Tuzaga</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      margin: 0; background: #f6f7f9; color: #1f2937;
+    }
+    header { background: #1f2937; color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 1.05rem; margin: 0; font-weight: 600; }
+    header .meta { font-size: 0.78rem; color: #9ca3af; }
+    main {
+      display: grid; grid-template-columns: 320px 1fr 360px; gap: 12px;
+      padding: 12px; height: calc(100vh - 49px);
+    }
+    section.panel {
+      background: #fff; border-radius: 8px; padding: 14px;
+      overflow-y: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    h3 { margin-top: 0; font-size: 0.95rem; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+
+    /* 입력폼 */
+    .client-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .client-form label { display: flex; flex-direction: column; font-size: 0.78rem; color: #6b7280; gap: 3px; }
+    .client-form label.full { grid-column: 1 / -1; }
+    .client-form input, .client-form select, .client-form textarea {
+      padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.85rem; font-family: inherit;
+    }
+
+    /* 채팅 */
+    .chat-wrap { display: flex; flex-direction: column; height: 100%; }
+    #chat { flex: 1; overflow-y: auto; padding-right: 4px; }
+    .msg { margin-bottom: 14px; padding: 10px 12px; border-radius: 6px; font-size: 0.88rem; line-height: 1.55; }
+    .msg-user      { background: #eef2ff; }
+    .msg-assistant { background: #f3f4f6; }
+    .msg-role { font-size: 0.7rem; color: #6b7280; margin-bottom: 4px; font-weight: 600; }
+    .thinking { color: #6b7280; }
+    .error { color: #b91c1c; }
+    .chat-input { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid #e5e7eb; margin-top: 8px; }
+    .chat-input textarea { flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; font: inherit; min-height: 56px; }
+    .chat-input button { padding: 0 16px; background: #1f2937; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .chat-input button:disabled { background: #9ca3af; cursor: not-allowed; }
+    #status { font-size: 0.72rem; color: #6b7280; margin-top: 6px; }
+
+    /* 토글 박스 */
+    details.breakdown-box, details.tool-call {
+      margin: 8px 0; border: 1px solid #e5e7eb; border-radius: 4px; background: #fafafa; padding: 6px 10px;
+    }
+    details summary { cursor: pointer; font-size: 0.8rem; color: #374151; font-weight: 600; }
+    details[open] summary { margin-bottom: 6px; }
+    details table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    details td, details th { padding: 4px 6px; border-bottom: 1px solid #e5e7eb; vertical-align: top; text-align: left; }
+    details td.value { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    details td.lawref { color: #6b7280; }
+    details .lawref-list { font-size: 0.75rem; color: #4b5563; margin-top: 6px; }
+    details .lawref-list ul { margin: 4px 0 0 18px; padding: 0; }
+    details pre { background: #fff; padding: 6px 8px; border-radius: 3px; font-size: 0.72rem; overflow-x: auto; }
+    details.tool-call { background: #fefce8; border-color: #fde68a; }
+
+    /* 보고서 */
+    .report-body section { padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; margin-bottom: 10px; }
+    .report-body em { color: #9ca3af; font-size: 0.85rem; }
+
+    /* API 키 설정 안내 */
+    .api-key-warn {
+      background: #fef3c7; border: 1px solid #fcd34d; padding: 10px 12px; border-radius: 6px;
+      font-size: 0.82rem; color: #92400e; margin-bottom: 10px;
+    }
+    .api-key-warn code { background: #fff; padding: 1px 4px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>AI 세무 컨설팅 — Tuzaga</h1>
+  <div class="meta">2026.5 시행 세법 · Phase 3 (대화·도구 호출)</div>
+</header>
+
+<main>
+  <section id="left-panel" class="panel">
+    <!-- 의뢰인 입력폼 -->
+  </section>
+
+  <section class="panel chat-wrap">
+    <h3>AI 대화</h3>
+    <div id="api-key-warn" class="api-key-warn" style="display:none">
+      <strong>⚠️ API 키 미설정</strong><br>
+      <code>config.example.js</code> → <code>config.js</code> 복사 후
+      <code>ANTHROPIC_API_KEY</code> 를 채워넣고 새로고침하세요.
+    </div>
+    <div id="chat"></div>
+    <div class="chat-input">
+      <textarea id="user-input" placeholder="질문을 입력하세요 (Ctrl/Cmd+Enter 로 전송)"></textarea>
+      <button id="send-btn">전송</button>
+    </div>
+    <div id="status">대기 중</div>
+  </section>
+
+  <section id="right-panel" class="panel">
+    <!-- 보고서 미리보기 -->
+  </section>
+</main>
+
+<script type="module">
+  import { mountInputForm } from './src/ui/input-form.js';
+  import { mountChat }      from './src/ui/chat.js';
+  import { mountPreview }   from './src/ui/preview.js';
+
+  let config;
+  try {
+    config = await import('./config.js');
+  } catch {
+    config = { ANTHROPIC_API_KEY: '', NARRATOR_MODEL: 'claude-sonnet-4-6', MAX_TOKENS: 4096 };
+    document.getElementById('api-key-warn').style.display = 'block';
+  }
+  if (!config.ANTHROPIC_API_KEY) {
+    document.getElementById('api-key-warn').style.display = 'block';
+  }
+
+  const form    = mountInputForm({ container: document.getElementById('left-panel') });
+  const preview = mountPreview({ container: document.getElementById('right-panel') });
+  mountChat({
+    container: document.getElementById('chat'),
+    inputEl:   document.getElementById('user-input'),
+    sendBtn:   document.getElementById('send-btn'),
+    statusEl:  document.getElementById('status'),
+    config,
+    getFormSummary: () => form.getSummary(),
+  });
+</script>
+
+</body>
+</html>

@@ -1,3 +1,6 @@
 node_modules/
 coverage/
 .vitest-cache/
+
+# API 키 — 절대 푸시 금지
+config.js
