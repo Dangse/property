@@ -12,3 +12,10 @@ export { runScenario7 }  from './scenario-7.js';
 export { runScenario8 }  from './scenario-8.js';
 export { runScenario9 }  from './scenario-9.js';
 export { runScenario10 } from './scenario-10.js';
+export { runScenario11 } from './scenario-11.js';
+export {
+  calcInheritAcquisitionTax,
+  calcInheritPropertyTaxChange,
+  calcInheritAggrTaxChange,
+  calcInheritTransferTax,
+} from './scenario-11.js';

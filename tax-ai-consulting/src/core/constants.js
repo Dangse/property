@@ -42,3 +42,63 @@ export const ADULT_AGE = 19;
 
 // 세대독립 판정 나이 (30세 이상이면 별도세대로 간주하는 시나리오 전제)
 export const INDEPENDENT_HH_AGE = 30;
+
+// ──────────────────────────────────────────────────────────────
+// 상속세 (상속세 및 증여세법, 2024년 정부개정안 부결 → 2026.5 현재 종전 유지)
+// 검증 출처: docs/tax-law-2026.md §1
+// ──────────────────────────────────────────────────────────────
+
+// 기초공제·일괄공제·인적공제 단가 (상증법 §18~§20)
+export const INHERIT_BASIC_DEDUCT = 200_000_000;       // 기초공제 2억
+export const INHERIT_LUMP_DEDUCT  = 500_000_000;       // 일괄공제 5억
+export const INHERIT_CHILD_DEDUCT_UNIT  = 50_000_000;  // 자녀공제 1인당 5천만
+export const INHERIT_MINOR_DEDUCT_UNIT  = 10_000_000;  // 미성년자 1년당 1천만
+export const INHERIT_SENIOR_DEDUCT_UNIT = 50_000_000;  // 65세 이상 1인당 5천만
+export const INHERIT_DISABLED_DEDUCT_UNIT = 10_000_000; // 장애인 1년당 1천만 (기대여명)
+export const INHERIT_MINOR_AGE_THRESHOLD = 19;
+
+// 배우자상속공제 (상증법 §19)
+export const INHERIT_SPOUSE_MIN = 500_000_000;          // 최소 5억
+export const INHERIT_SPOUSE_MAX = 3_000_000_000;        // 최대 30억
+export const SPOUSE_LEGAL_SHARE_RATIO = 1.5;            // 배우자 법정상속분 가중치
+
+// 동거주택상속공제 (상증법 §23의2)
+export const INHERIT_COHABITATION_MAX = 600_000_000;    // 6억 한도
+
+// 금융재산상속공제 (상증법 §22)
+export const INHERIT_FINANCIAL_FULL_BELOW = 20_000_000; // 2천만 이하 전액
+export const INHERIT_FINANCIAL_RATE = 0.20;             // 초과 시 20%
+export const INHERIT_FINANCIAL_MIN  = 20_000_000;       // 최소 2천만
+export const INHERIT_FINANCIAL_MAX  = 200_000_000;      // 최대 2억
+
+// 장례비 공제 (상증법 §14①2, 시행령 §9의2)
+export const FUNERAL_MIN = 5_000_000;                   // 최소 500만 일률공제
+export const FUNERAL_GENERAL_MAX = 10_000_000;          // 일반장례비 1천만 한도
+export const FUNERAL_SUPPLEMENTAL_MAX = 5_000_000;      // 봉안시설 별도 500만 한도
+
+// 감정평가수수료 (상증법 시행령 §20의3)
+export const APPRAISAL_FEE_MAX = 5_000_000;             // 500만 한도
+
+// 세대생략 할증과세 (상증법 §27)
+export const INHERIT_SKIP_RATE_DEFAULT = 0.30;          // 30%
+export const INHERIT_SKIP_RATE_MINOR_LARGE = 0.40;      // 미성년 + 20억 초과 40%
+export const INHERIT_SKIP_LARGE_THRESHOLD = 2_000_000_000;
+
+// 신고세액공제 (상증법 §69)
+export const INHERIT_FAITHFUL_REPORT_DISCOUNT = 0.03;   // 3%
+
+// 추정상속재산 임계값 (상증법 §15)
+export const PRESUMED_1Y_THRESHOLD = 200_000_000;       // 1년 2억
+export const PRESUMED_2Y_THRESHOLD = 500_000_000;       // 2년 5억
+
+// 상속주택 주택수 제외 특례 기간 (종부세법 §15의2, 지방세법 §111의2)
+export const INHERIT_HOUSE_EXCLUSION_YEARS = 5;
+
+// 상속 취득세 (지방세법 §11①4)
+export const INHERIT_ACQ_HOUSE_SINGLE = 0.008;          // 1세대1주택 0.8%
+export const INHERIT_ACQ_HOUSE_MULTI  = 0.028;          // 다주택·일반 2.8%
+export const INHERIT_ACQ_FARMLAND     = 0.023;          // 농지 2.3%
+export const INHERIT_ACQ_OTHER        = 0.028;          // 건물·일반토지 2.8%
+export const INHERIT_ACQ_FARMLAND_EDU = 0.0006;         // 농지 교육세 0.06%
+export const INHERIT_ACQ_DEFAULT_EDU  = 0.0016;         // 일반 교육세 0.16%
+export const INHERIT_ACQ_AG_RATE      = 0.002;          // 농특세 0.2% (85㎡ 초과)

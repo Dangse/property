@@ -9,3 +9,8 @@ export { calcTakingTax, calcGiveTakingEtcTax } from './acquisition-tax.js';
 export { calcPropertyTax }         from './property-tax.js';
 export { calcAggrTax }             from './comprehensive-tax.js';
 export { calcSaleIncomeTax }       from './transfer-tax.js';
+export {
+  calcInheritTax, calcInheritTariff,
+  calcFuneralDeduct, calcFinancialDeduct, calcCohabitationDeduct,
+  calcBasicAndPersonalDeduct, calcSpouseDeduct, shortTermReinheritRate,
+} from './inheritance-tax.js';
